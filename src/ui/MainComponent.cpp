@@ -8852,7 +8852,7 @@ std::unique_ptr<juce::AlertWindow> MainComponent::makeAboutWindow()
             : juce::AlertWindow ("WMK Sonic Studio " JUCE_APPLICATION_VERSION_STRING,
                                  tr ("Lightweight C++/JUCE DAW: FL Studio-style patterns and Ableton Live-style clips.\n"
                                      "Independent implementation: no Image-Line or Ableton code was copied.")
-                                     + "\n\n" + tr ("Logo by {0}", { "w3teal" }) // the community member who made it
+                                     + "\n\n" + "Identidade WMK: Walney Moreira Klein — walneyk@hotmail.com."
                                      // round 190gl: Ableton Link's credit (GPL-2.0-or-later; THIRD_PARTY.md lists every component)
                                      + "\n" + tr ("Ableton Link by Ableton AG (GPL 2.0 or later). Every open-source component and its licence: THIRD_PARTY.md"),
                                  juce::MessageBoxIconType::NoIcon)
