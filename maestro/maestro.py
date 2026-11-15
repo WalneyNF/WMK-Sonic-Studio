@@ -154,6 +154,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             self.send(200, (HERE/"index.html").read_bytes(), "text/html; charset=utf-8")
+        elif self.path == "/pipeline.html":
+            self.send(200, (HERE/"pipeline.html").read_bytes(), "text/html; charset=utf-8")
+        elif self.path == "/api/pipeline/config":
+            from pipeline import read_config
+            self.send(200,json.dumps(read_config(),ensure_ascii=False).encode())
         elif self.path == "/agente.html":
             self.send(200, (HERE/"agente.html").read_bytes(), "text/html; charset=utf-8")
         elif self.path == "/integracoes.html":
@@ -174,7 +179,7 @@ class Handler(BaseHTTPRequestHandler):
             else: self.send(404, b'{"erro":"Arquivo nao encontrado"}')
         else: self.send(404, b'{"erro":"Nao encontrado"}')
     def do_POST(self):
-        if self.path not in ("/api/compose", "/api/partituras", "/api/provedores/salvar", "/api/provedores/excluir", "/api/provedores/testar", "/api/ensinar", "/api/agente/planejar", "/api/agente/aplicar"):
+        if self.path not in ("/api/compose", "/api/partituras", "/api/provedores/salvar", "/api/provedores/excluir", "/api/provedores/testar", "/api/ensinar", "/api/agente/planejar", "/api/agente/aplicar", "/api/pipeline/config", "/api/pipeline/run"):
             return self.send(404, b'{"erro":"Nao encontrado"}')
         if not self._allowed_origin():
             return self.send(403, b'{"erro":"Origem nao autorizada"}')
@@ -182,6 +187,17 @@ class Handler(BaseHTTPRequestHandler):
             size = int(self.headers.get("Content-Length", "0"))
             max_size = 2 * 1024 * 1024 if self.path == "/api/partituras" else 8192
             if not 0 < size <= max_size: raise ValueError("Pedido muito grande ou vazio.")
+            if self.path in ("/api/pipeline/config", "/api/pipeline/run"):
+                if size>40000: raise ValueError("Pedido acima do limite.")
+                payload=json.loads(self.rfile.read(size))
+                if self.path == "/api/pipeline/config":
+                    from pipeline import save_config
+                    result=save_config(payload)
+                else:
+                    from pipeline import run_pipeline
+                    result=run_pipeline(payload.get("pedido",""),payload.get("modo","ia"),payload.get("provedor") or None)
+                self.send(200,json.dumps(result,ensure_ascii=False).encode())
+                return
             if self.path.startswith("/api/agente/"):
                 if size > 8192: raise ValueError("Pedido muito grande.")
                 data=json.loads(self.rfile.read(size))
