@@ -23,7 +23,7 @@ class IntegrationTests(unittest.TestCase):
             with patch.object(integracoes.subprocess,"run",side_effect=fake_run) as run:
                 x=integracoes.convert(src,dst,str(exe))
                 self.assertTrue(dst.exists())
-                self.assertEqual(x["saida"],str(dst))
+                self.assertEqual(Path(x["saida"]),dst.resolve())
                 self.assertIn("-o",run.call_args.args[0])
                 self.assertFalse(run.call_args.kwargs.get("shell",False))
     def test_invalid_format(self):
