@@ -33,6 +33,8 @@ O workflow existente `.github/workflows/release.yml` prevê compilação e gera�
 - [Código do gerador MIDI](maestro/maestro.py)
 
 ## Manuais WMK
+
+- [Manuais de música e IA](manuais.html) — curso completo em português para iniciantes.
 - [Manual de iniciação musical e trilhas para jogos](manual.html)
 - [Roadmap de evolução](roadmap.html)
 - [Pesquisa e comparação de DAWs](pesquisa.html)
