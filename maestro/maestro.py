@@ -172,7 +172,7 @@ class Handler(BaseHTTPRequestHandler):
             else: self.send(404, b'{"erro":"Arquivo nao encontrado"}')
         else: self.send(404, b'{"erro":"Nao encontrado"}')
     def do_POST(self):
-        if self.path not in ("/api/compose", "/api/partituras", "/api/provedores/salvar", "/api/provedores/excluir", "/api/provedores/testar", "/api/ensinar"):
+        if self.path not in ("/api/compose", "/api/partituras", "/api/provedores/salvar", "/api/provedores/excluir", "/api/provedores/testar", "/api/ensinar", "/api/agente/planejar", "/api/agente/aplicar"):
             return self.send(404, b'{"erro":"Nao encontrado"}')
         if not self._allowed_origin():
             return self.send(403, b'{"erro":"Origem nao autorizada"}')
@@ -180,6 +180,17 @@ class Handler(BaseHTTPRequestHandler):
             size = int(self.headers.get("Content-Length", "0"))
             max_size = 2 * 1024 * 1024 if self.path == "/api/partituras" else 8192
             if not 0 < size <= max_size: raise ValueError("Pedido muito grande ou vazio.")
+            if self.path.startswith("/api/agente/"):
+                if size > 8192: raise ValueError("Pedido muito grande.")
+                data=json.loads(self.rfile.read(size))
+                if not isinstance(data,dict): raise ValueError("Pedido inválido.")
+                from agente import plan, apply
+                if self.path == "/api/agente/planejar":
+                    result=plan(str(data.get("arquivo","")),str(data.get("pedido","")),data.get("provedor") or None,bool(data.get("usar_ia",False)))
+                else:
+                    result=apply(str(data.get("arquivo","")),data.get("acoes"))
+                self.send(200,json.dumps(result,ensure_ascii=False).encode())
+                return
             if self.path.startswith("/api/provedores/") or self.path == "/api/ensinar":
                 if size > 8192: raise ValueError("Pedido muito grande.")
                 data = json.loads(self.rfile.read(size))
