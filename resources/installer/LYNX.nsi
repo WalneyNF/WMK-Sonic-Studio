@@ -1,4 +1,4 @@
-; LYNX SHARE per-user Windows installer (NSIS 3). Built by scripts/make-installer.sh; no admin rights needed.
+; WMK Sonic Studio per-user Windows installer (NSIS 3). Built by scripts/make-installer.sh; no admin rights needed.
 ; Installs to %LOCALAPPDATA%\Programs\LYNX, adds Start-menu (and optional desktop) shortcuts, registers .lynx
 ; projects and offers LYNX in Explorer's "Open with" for .flp without taking over FL Studio's default.
 ; The uninstaller removes only what this installer added (settings in %APPDATA%\LYNX stay).
@@ -15,19 +15,19 @@ ManifestDPIAware true
 !include "LogicLib.nsh"
 !include "Sections.nsh"
 
-!define APP "LYNX SHARE" ; the product name shown (v0.1.20 rename); folders, keys and LYNX.exe keep "LYNX"
+!define APP "WMK Sonic Studio" ; WMK name; legacy technical EXE and project IDs retained for compatibility
 !define PROGID "LYNX.Project"
 !define FLP_PROGID "LYNX.FLProject"
-!define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\LYNX"
+!define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\WMK Sonic Studio"
 
 Name "${APP} ${VERSION}"
 OutFile "${OUTFILE}"
-InstallDir "$LOCALAPPDATA\Programs\LYNX"
+InstallDir "$LOCALAPPDATA\Programs\WMK Sonic Studio"
 InstallDirRegKey HKCU "Software\LYNX" "InstallDir"
-BrandingText "LYNX SHARE ${VERSION}"
+BrandingText "WMK Sonic Studio ${VERSION}"
 VIProductVersion "${VERSION}.0"
-VIAddVersionKey "ProductName" "LYNX SHARE"
-VIAddVersionKey "FileDescription" "LYNX SHARE installer"
+VIAddVersionKey "ProductName" "WMK Sonic Studio"
+VIAddVersionKey "FileDescription" "WMK Sonic Studio installer"
 VIAddVersionKey "ProductVersion" "${VERSION}"
 VIAddVersionKey "FileVersion" "${VERSION}"
 VIAddVersionKey "LegalCopyright" "AGPL-3.0"
@@ -50,18 +50,18 @@ VIAddVersionKey "LegalCopyright" "AGPL-3.0"
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "PortugueseBR"
 
-LangString RunLynx ${LANG_ENGLISH} "Start LYNX SHARE"
-LangString RunLynx ${LANG_PORTUGUESEBR} "Abrir o LYNX SHARE"
-LangString SecApp ${LANG_ENGLISH} "LYNX SHARE (required)"
-LangString SecApp ${LANG_PORTUGUESEBR} "LYNX SHARE (obrigatório)"
+LangString RunLynx ${LANG_ENGLISH} "Start WMK Sonic Studio"
+LangString RunLynx ${LANG_PORTUGUESEBR} "Abrir o WMK Sonic Studio"
+LangString SecApp ${LANG_ENGLISH} "WMK Sonic Studio (required)"
+LangString SecApp ${LANG_PORTUGUESEBR} "WMK Sonic Studio (obrigatório)"
 LangString SecDesktop ${LANG_ENGLISH} "Desktop shortcut"
 LangString SecDesktop ${LANG_PORTUGUESEBR} "Atalho na área de trabalho"
-LangString SecFlp ${LANG_ENGLISH} "Offer LYNX SHARE in $\"Open with$\" for FL Studio projects (.flp)"
-LangString SecFlp ${LANG_PORTUGUESEBR} "Oferecer o LYNX SHARE em $\"Abrir com$\" para projetos do FL Studio (.flp)"
-LangString FlpType ${LANG_ENGLISH} "FL Studio project (LYNX SHARE)"
-LangString FlpType ${LANG_PORTUGUESEBR} "Projeto do FL Studio (LYNX SHARE)"
-LangString StillRunning ${LANG_ENGLISH} "LYNX SHARE is running. Close it and click Retry."
-LangString StillRunning ${LANG_PORTUGUESEBR} "O LYNX SHARE está aberto. Feche-o e clique em Repetir."
+LangString SecFlp ${LANG_ENGLISH} "Offer WMK Sonic Studio in $\"Open with$\" for FL Studio projects (.flp)"
+LangString SecFlp ${LANG_PORTUGUESEBR} "Oferecer o WMK Sonic Studio em $\"Abrir com$\" para projetos do FL Studio (.flp)"
+LangString FlpType ${LANG_ENGLISH} "FL Studio project (WMK Sonic Studio)"
+LangString FlpType ${LANG_PORTUGUESEBR} "Projeto do FL Studio (WMK Sonic Studio)"
+LangString StillRunning ${LANG_ENGLISH} "WMK Sonic Studio is running. Close it and click Retry."
+LangString StillRunning ${LANG_PORTUGUESEBR} "O WMK Sonic Studio está aberto. Feche-o e clique em Repetir."
 
 Function .onInit
     ; the installer's language follows Windows
@@ -106,23 +106,23 @@ Section "!$(SecApp)" SecMain
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 
     Delete "$SMPROGRAMS\LYNX.lnk" ; the shortcut before the v0.1.20 rename
-    CreateShortCut "$SMPROGRAMS\LYNX SHARE.lnk" "$INSTDIR\LYNX.exe" "" "$INSTDIR\LYNX.exe" 0
+    CreateShortCut "$SMPROGRAMS\WMK Sonic Studio.lnk" "$INSTDIR\LYNX.exe" "" "$INSTDIR\LYNX.exe" 0
 
     ; .lynx projects (LYNX itself keeps this up to date at every start, too)
     WriteRegStr HKCU "Software\Classes\.lynx" "" "${PROGID}"
     WriteRegStr HKCU "Software\Classes\.lynx" "Content Type" "application/x-lynx-project"
-    WriteRegStr HKCU "Software\Classes\${PROGID}" "" "LYNX SHARE Project"
+    WriteRegStr HKCU "Software\Classes\${PROGID}" "" "WMK Sonic Studio Project"
     WriteRegStr HKCU "Software\Classes\${PROGID}\DefaultIcon" "" '"$INSTDIR\LYNX.exe",-2'
     WriteRegStr HKCU "Software\Classes\${PROGID}\shell\open\command" "" '"$INSTDIR\LYNX.exe" "%1"'
     ; "Open with" list entry for the app
-    WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe" "FriendlyAppName" "LYNX SHARE"
+    WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe" "FriendlyAppName" "WMK Sonic Studio"
     WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe\shell\open\command" "" '"$INSTDIR\LYNX.exe" "%1"'
     WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe\SupportedTypes" ".lynx" ""
 
     WriteRegStr HKCU "Software\LYNX" "InstallDir" "$INSTDIR"
-    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "LYNX SHARE"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "WMK Sonic Studio"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
-    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "LYNX SHARE"
+    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "WMK"
     WriteRegStr HKCU "${UNINST_KEY}" "URLInfoAbout" "https://github.com/Ka1-S/LYNX-SHARE"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" '"$INSTDIR\LYNX.exe",0'
     WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
@@ -137,7 +137,7 @@ SectionEnd
 Section "$(SecDesktop)" SecDesktop
     SetShellVarContext current
     Delete "$DESKTOP\LYNX.lnk"
-    CreateShortCut "$DESKTOP\LYNX SHARE.lnk" "$INSTDIR\LYNX.exe" "" "$INSTDIR\LYNX.exe" 0
+    CreateShortCut "$DESKTOP\WMK Sonic Studio.lnk" "$INSTDIR\LYNX.exe" "" "$INSTDIR\LYNX.exe" 0
 SectionEnd
 
 Section "$(SecFlp)" SecFlp
@@ -186,8 +186,8 @@ Section "Uninstall"
     RMDir "$INSTDIR"
     Delete "$SMPROGRAMS\LYNX.lnk"
     Delete "$DESKTOP\LYNX.lnk"
-    Delete "$SMPROGRAMS\LYNX SHARE.lnk"
-    Delete "$DESKTOP\LYNX SHARE.lnk"
+    Delete "$SMPROGRAMS\WMK Sonic Studio.lnk"
+    Delete "$DESKTOP\WMK Sonic Studio.lnk"
 
     ; only our own keys and values; .lynx is removed only while it still points at LYNX
     ReadRegStr $0 HKCU "Software\Classes\.lynx" ""
@@ -204,13 +204,13 @@ Section "Uninstall"
     System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 SectionEnd
 
-; A silent install (/S) is LYNX SHARE's in-app update (ui/Updater.h, round 166b): it keeps the choices of the install it
+; A silent install (/S) is WMK Sonic Studio's in-app update (ui/Updater.h, round 166b): it keeps the choices of the install it
 ; updates instead of the defaults, so an update never adds a desktop shortcut or the .flp "Open with" entry the user
 ; left out. (Defined after the sections: it names their indices.)
 Function SilentKeepsChoices
     ${If} ${Silent}
         SetShellVarContext current
-        ${IfNot} ${FileExists} "$DESKTOP\LYNX SHARE.lnk"
+        ${IfNot} ${FileExists} "$DESKTOP\WMK Sonic Studio.lnk"
             !insertmacro UnselectSection ${SecDesktop}
         ${EndIf}
         ReadRegStr $0 HKCU "Software\Classes\${FLP_PROGID}" ""
