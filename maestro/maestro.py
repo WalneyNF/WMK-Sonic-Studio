@@ -8,8 +8,8 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
 
-HERE = Path(__file__).resolve().parent
-OUTPUT = HERE / "composicoes"
+HERE = (Path(sys._MEIPASS) / "maestro") if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
+OUTPUT = (Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "WMK-Sonic-Studio" / "composicoes") if getattr(sys, "frozen", False) else HERE / "composicoes"
 PPQ = 480
 STYLES = {
     "medieval": {"bpm": 95, "instruments": ["Sanfona", "Violao", "Baixo", "Percussao"], "mode": "minor"},
