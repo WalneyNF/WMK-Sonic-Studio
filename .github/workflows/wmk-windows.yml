@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/wmk-windows.yml'
+      - 'src/**'
+      - 'resources/**'
+      - 'CMakeLists.txt'
 permissions:
   contents: write
 concurrency:
@@ -72,7 +75,7 @@ jobs:
           New-Item -ItemType Directory -Force "pkg\$name",dist | Out-Null
           Copy-Item bin\LYNX.exe,LICENSE,THIRD_PARTY.md,PRIVACY.md "pkg\$name\"
           foreach ($file in @('onnxruntime.dll','LYNX-bridge32.exe','lynx-asio.dll','lynx-asio32.dll')) { if (Test-Path "bin\$file") { Copy-Item "bin\$file" "pkg\$name\" } }
-          if (Test-Path 'manual.html') { Copy-Item manual.html "pkg\$name\" }
+          foreach ($doc in @('manual.html','manuais.html','roadmap.html','pesquisa.html')) { if (Test-Path $doc) { Copy-Item $doc "pkg\$name\" } }
           if (Test-Path 'README.md') { Copy-Item README.md "pkg\$name\" }
           if (Test-Path 'asio\Register LYNX ASIO.bat') { Copy-Item 'asio\Register LYNX ASIO.bat','asio\Unregister LYNX ASIO.bat' "pkg\$name\" }
           Compress-Archive -Path "pkg\$name" -DestinationPath "dist\WMK-Sonic-Studio-Portable-Windows-x64.zip"
