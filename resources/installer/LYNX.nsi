@@ -3,7 +3,7 @@
 ; projects and offers LYNX in Explorer's "Open with" for .flp without taking over FL Studio's default.
 ; The uninstaller removes only what this installer added (settings in %APPDATA%\LYNX stay).
 ;
-; Defines passed by the script / release workflow: VERSION (e.g. 0.1.3), STAGE (folder with LYNX.exe, LICENSE,
+; Defines passed by the script / release workflow: VERSION (e.g. 0.1.3), STAGE (folder with WMK-Sonic-Studio.exe, LICENSE,
 ; THIRD_PARTY.md, optional PRIVACY.md and Demo.lynx), OUTFILE, ICON.
 
 Unicode true
@@ -16,14 +16,14 @@ ManifestDPIAware true
 !include "Sections.nsh"
 
 !define APP "WMK Sonic Studio" ; WMK name; legacy technical EXE and project IDs retained for compatibility
-!define PROGID "LYNX.Project"
-!define FLP_PROGID "LYNX.FLProject"
+!define PROGID "WMK.SonicStudio.Project"
+!define FLP_PROGID "WMK.SonicStudio.FLProject"
 !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\WMK Sonic Studio"
 
 Name "${APP} ${VERSION}"
 OutFile "${OUTFILE}"
 InstallDir "$LOCALAPPDATA\Programs\WMK Sonic Studio"
-InstallDirRegKey HKCU "Software\LYNX" "InstallDir"
+InstallDirRegKey HKCU "Software\WMK Sonic Studio" "InstallDir"
 BrandingText "WMK Sonic Studio ${VERSION}"
 VIProductVersion "${VERSION}.0"
 VIAddVersionKey "ProductName" "WMK Sonic Studio"
@@ -35,7 +35,7 @@ VIAddVersionKey "LegalCopyright" "AGPL-3.0"
 !define MUI_ICON "${ICON}"
 !define MUI_UNICON "${ICON}"
 !define MUI_ABORTWARNING
-!define MUI_FINISHPAGE_RUN "$INSTDIR\LYNX.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\WMK-Sonic-Studio.exe"
 !define MUI_FINISHPAGE_RUN_TEXT "$(RunLynx)"
 
 !insertmacro MUI_PAGE_WELCOME
@@ -66,7 +66,7 @@ LangString StillRunning ${LANG_PORTUGUESEBR} "O WMK Sonic Studio está aberto. F
 Function .onInit
     ; the installer's language follows Windows
     System::Call 'kernel32::GetUserDefaultUILanguage() i .r0'
-    ${If} $0 == 1046
+    ${If} WriteRegStr HKCU "Software\WMK Sonic Studio" == 1046
         StrCpy $LANGUAGE ${LANG_PORTUGUESEBR}
     ${EndIf}
     Call SilentKeepsChoices
@@ -76,8 +76,8 @@ FunctionEnd
     ; overwriting a running exe fails: ask to close it first
     retry:
     ClearErrors
-    ${If} ${FileExists} "$INSTDIR\LYNX.exe"
-        FileOpen $0 "$INSTDIR\LYNX.exe" a
+    ${If} ${FileExists} "$INSTDIR\WMK-Sonic-Studio.exe"
+        FileOpen $0 "$INSTDIR\WMK-Sonic-Studio.exe" a
         ${If} ${Errors}
             MessageBox MB_RETRYCANCEL|MB_ICONEXCLAMATION "$(StillRunning)" IDRETRY retry
             Abort
@@ -91,7 +91,7 @@ Section "!$(SecApp)" SecMain
     SetShellVarContext current
     !insertmacro CheckNotRunning
     SetOutPath "$INSTDIR"
-    File "${STAGE}\LYNX.exe"
+    File "${STAGE}\WMK-Sonic-Studio.exe"
     File /nonfatal "${STAGE}\onnxruntime.dll" ; Extract stems from sample
     File "${STAGE}\LICENSE"
     File "${STAGE}\THIRD_PARTY.md"
@@ -106,25 +106,25 @@ Section "!$(SecApp)" SecMain
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 
     Delete "$SMPROGRAMS\LYNX.lnk" ; the shortcut before the v0.1.20 rename
-    CreateShortCut "$SMPROGRAMS\WMK Sonic Studio.lnk" "$INSTDIR\LYNX.exe" "" "$INSTDIR\LYNX.exe" 0
+    CreateShortCut "$SMPROGRAMS\WMK Sonic Studio.lnk" "$INSTDIR\WMK-Sonic-Studio.exe" "" "$INSTDIR\WMK-Sonic-Studio.exe" 0
 
     ; .lynx projects (LYNX itself keeps this up to date at every start, too)
     WriteRegStr HKCU "Software\Classes\.lynx" "" "${PROGID}"
     WriteRegStr HKCU "Software\Classes\.lynx" "Content Type" "application/x-lynx-project"
     WriteRegStr HKCU "Software\Classes\${PROGID}" "" "WMK Sonic Studio Project"
-    WriteRegStr HKCU "Software\Classes\${PROGID}\DefaultIcon" "" '"$INSTDIR\LYNX.exe",-2'
-    WriteRegStr HKCU "Software\Classes\${PROGID}\shell\open\command" "" '"$INSTDIR\LYNX.exe" "%1"'
+    WriteRegStr HKCU "Software\Classes\${PROGID}\DefaultIcon" "" '"$INSTDIR\WMK-Sonic-Studio.exe",-2'
+    WriteRegStr HKCU "Software\Classes\${PROGID}\shell\open\command" "" '"$INSTDIR\WMK-Sonic-Studio.exe" "%1"'
     ; "Open with" list entry for the app
-    WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe" "FriendlyAppName" "WMK Sonic Studio"
-    WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe\shell\open\command" "" '"$INSTDIR\LYNX.exe" "%1"'
-    WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe\SupportedTypes" ".lynx" ""
+    WriteRegStr HKCU "Software\Classes\Applications\WMK-Sonic-Studio.exe" "FriendlyAppName" "WMK Sonic Studio"
+    WriteRegStr HKCU "Software\Classes\Applications\WMK-Sonic-Studio.exe\shell\open\command" "" '"$INSTDIR\WMK-Sonic-Studio.exe" "%1"'
+    WriteRegStr HKCU "Software\Classes\Applications\WMK-Sonic-Studio.exe\SupportedTypes" ".lynx" ""
 
-    WriteRegStr HKCU "Software\LYNX" "InstallDir" "$INSTDIR"
+    $0 "$INSTDIR"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "WMK Sonic Studio"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "WMK"
-    WriteRegStr HKCU "${UNINST_KEY}" "URLInfoAbout" "https://github.com/Ka1-S/LYNX-SHARE"
-    WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" '"$INSTDIR\LYNX.exe",0'
+    WriteRegStr HKCU "${UNINST_KEY}" "URLInfoAbout" "https://github.com/WalneyNF/WMK-Sonic-Studio"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" '"$INSTDIR\WMK-Sonic-Studio.exe",0'
     WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
     WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\Uninstall.exe" /S'
@@ -137,16 +137,16 @@ SectionEnd
 Section "$(SecDesktop)" SecDesktop
     SetShellVarContext current
     Delete "$DESKTOP\LYNX.lnk"
-    CreateShortCut "$DESKTOP\WMK Sonic Studio.lnk" "$INSTDIR\LYNX.exe" "" "$INSTDIR\LYNX.exe" 0
+    CreateShortCut "$DESKTOP\WMK Sonic Studio.lnk" "$INSTDIR\WMK-Sonic-Studio.exe" "" "$INSTDIR\WMK-Sonic-Studio.exe" 0
 SectionEnd
 
 Section "$(SecFlp)" SecFlp
     ; adds LYNX to .flp's "Open with" list only: FL Studio stays the default program for .flp
     WriteRegStr HKCU "Software\Classes\${FLP_PROGID}" "" "$(FlpType)"
-    WriteRegStr HKCU "Software\Classes\${FLP_PROGID}\DefaultIcon" "" '"$INSTDIR\LYNX.exe",0'
-    WriteRegStr HKCU "Software\Classes\${FLP_PROGID}\shell\open\command" "" '"$INSTDIR\LYNX.exe" "%1"'
+    WriteRegStr HKCU "Software\Classes\${FLP_PROGID}\DefaultIcon" "" '"$INSTDIR\WMK-Sonic-Studio.exe",0'
+    WriteRegStr HKCU "Software\Classes\${FLP_PROGID}\shell\open\command" "" '"$INSTDIR\WMK-Sonic-Studio.exe" "%1"'
     WriteRegStr HKCU "Software\Classes\.flp\OpenWithProgids" "${FLP_PROGID}" ""
-    WriteRegStr HKCU "Software\Classes\Applications\LYNX.exe\SupportedTypes" ".flp" ""
+    WriteRegStr HKCU "Software\Classes\Applications\WMK-Sonic-Studio.exe\SupportedTypes" ".flp" ""
 SectionEnd
 
 Section "-notify"
@@ -155,7 +155,7 @@ SectionEnd
 
 Section "Uninstall"
     SetShellVarContext current
-    Delete "$INSTDIR\LYNX.exe"
+    Delete "$INSTDIR\WMK-Sonic-Studio.exe"
     Delete "$INSTDIR\LYNX.pdb"
     Delete "$INSTDIR\LICENSE"
     Delete "$INSTDIR\THIRD_PARTY.md"
@@ -198,7 +198,7 @@ Section "Uninstall"
     DeleteRegKey HKCU "Software\Classes\${FLP_PROGID}"
     DeleteRegValue HKCU "Software\Classes\.flp\OpenWithProgids" "${FLP_PROGID}"
     ; (the .flp key itself is FL Studio's: left alone)
-    DeleteRegKey HKCU "Software\Classes\Applications\LYNX.exe"
+    DeleteRegKey HKCU "Software\Classes\Applications\WMK-Sonic-Studio.exe"
     DeleteRegKey HKCU "Software\LYNX"
     DeleteRegKey HKCU "${UNINST_KEY}"
     System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
