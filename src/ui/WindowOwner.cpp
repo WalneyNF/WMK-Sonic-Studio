@@ -184,36 +184,77 @@ void removeDialogTextFocus()
     dialogTextFocus() = nullptr;
 }
 
+// WMK Sonic Studio - identidade vetorial roxa e prata. Sem recursos binarios externos.
+static juce::Image wmkBrandImage()
+{
+    static const juce::Image brand = [] {
+        juce::Image image (juce::Image::ARGB, 512, 512, true);
+        juce::Graphics g (image);
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xff100d21), 0.0f, 0.0f,
+                                                juce::Colour (0xff2e1950), 512.0f, 512.0f, false));
+        g.fillRoundedRectangle (8.0f, 8.0f, 496.0f, 496.0f, 88.0f);
+        g.setColour (juce::Colour (0xffa877ec));
+        g.drawEllipse (58.0f, 46.0f, 396.0f, 396.0f, 10.0f);
+        g.setColour (juce::Colour (0xffb7b0d3).withAlpha (0.6f));
+        g.drawEllipse (81.0f, 69.0f, 350.0f, 350.0f, 2.0f);
+        g.setColour (juce::Colour (0xff9481c5));
+        for (int i = 0; i < 13; ++i)
+        {
+            const auto x = 110.0f + 24.0f * (float) i;
+            const auto bar = 26.0f + 14.0f * (float) ((i * 7 + 3) % 6);
+            g.fillRoundedRectangle (x, 225.0f - bar / 2.0f, 6.0f, bar, 3.0f);
+        }
+        g.setColour (juce::Colour (0xffeeeaf8));
+        g.setFont (juce::Font (juce::FontOptions (116.0f, juce::Font::bold)));
+        g.drawFittedText ("WMK", 42, 205, 428, 125, juce::Justification::centred, 1);
+        juce::Path wave;
+        wave.startNewSubPath (95.0f, 341.0f);
+        for (int i = 0; i < 12; ++i)
+        {
+            const auto x = 116.0f + 26.0f * (float) i;
+            wave.lineTo (x, 341.0f + (float) ((i % 3) - 1) * (i % 4 == 0 ? 28.0f : 14.0f));
+        }
+        wave.lineTo (425.0f, 341.0f);
+        g.setColour (juce::Colour (0xff83d5ef));
+        g.strokePath (wave, juce::PathStrokeType (4.0f, juce::PathStrokeType::curved,
+                                                juce::PathStrokeType::rounded));
+        g.setColour (juce::Colour (0xffd8d4e5));
+        g.setFont (juce::Font (juce::FontOptions (33.0f, juce::Font::bold)));
+        g.drawFittedText ("SONIC STUDIO", 43, 378, 426, 49, juce::Justification::centred, 1);
+        return image;
+    }();
+    return brand;
+}
+
 juce::Image logoImage()
 {
-    return juce::ImageCache::getFromMemory (logo::png512, (int) sizeof (logo::png512));
+    return wmkBrandImage();
 }
 
 juce::Image decodeLogoImage()
 {
-    return juce::ImageFileFormat::loadFrom (logo::png512, sizeof (logo::png512));
+    return wmkBrandImage().createCopy();
 }
 
 juce::Image logoSmallImage()
 {
-    return juce::ImageCache::getFromMemory (logo::pngSmall, (int) sizeof (logo::pngSmall));
+    return wmkBrandImage().rescaled (128, 128, juce::Graphics::highResamplingQuality);
 }
 
 juce::Image logoTinyImage()
 {
-    return juce::ImageCache::getFromMemory (logo::pngTiny, (int) sizeof (logo::pngTiny));
+    return wmkBrandImage().rescaled (48, 48, juce::Graphics::highResamplingQuality);
 }
 
 juce::Image logoMarkImage()
 {
-    return juce::ImageCache::getFromMemory (logo::markPng512, (int) sizeof (logo::markPng512));
+    return wmkBrandImage();
 }
 
 juce::Image logoMarkSmallImage()
 {
-    return juce::ImageCache::getFromMemory (logo::markSmall, (int) sizeof (logo::markSmall));
+    return logoSmallImage();
 }
-
 LogoDisc logoDisc()
 {
     return { logo::discX, logo::discY, logo::discR };
