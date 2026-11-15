@@ -1,0 +1,28 @@
+name: WMK Maestro IA - testes
+on:
+  push:
+    paths:
+      - 'maestro/**'
+      - '.github/workflows/maestro-tests.yml'
+  pull_request:
+    paths:
+      - 'maestro/**'
+      - '.github/workflows/maestro-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  testar:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Testar compositor MIDI
+        run: python -m unittest discover -s maestro -p 'test_*.py' -v
+      - name: Compilar sintaxe Python
+        run: python -m py_compile maestro/maestro.py maestro/test_maestro.py
