@@ -58,3 +58,10 @@ O código derivado é distribuído sob a [GNU AGPL-3.0](LICENSE). Você pode usa
 O conversor é executado **no seu computador** e usa a instalação local do MuseScore Studio. O painel monta prompts para o Suno, mas **não utiliza API não oficial nem baixa músicas automaticamente**. Use áudio somente quando houver licença e download permitidos, especialmente em jogos comerciais.
 
 No Windows: `py -3 maestro/maestro.py`, depois `http://127.0.0.1:8768/integracoes.html`.
+
+## WMK Maestro Agent — edição MIDI com comandos em português
+
+- [Painel do agente](maestro/agente.html) — execute primeiro `py -3 maestro/maestro.py` e abra `http://127.0.0.1:8768/agente.html`.
+- [Código do agente](maestro/agente.py) e [testes](maestro/test_agente.py).
+
+**Protótipo experimental:** crie uma música pelo Maestro, copie o nome do arquivo MIDI, peça para alterar tempo, transpor notas ou ajustar a dinâmica e confira a prévia antes de aplicar. Cada alteração gera um novo MIDI, mantendo a versão anterior. O agente ainda não opera os controles C++/JUCE do Mixer ou os plugins.
