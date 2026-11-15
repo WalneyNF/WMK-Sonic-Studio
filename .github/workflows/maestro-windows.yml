@@ -10,7 +10,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: wmk-maestro-windows-@@ github.ref @@
+  group: wmk-maestro-windows-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -58,7 +58,7 @@ jobs:
       - name: Publicar versão experimental no Releases
         shell: bash
         env:
-          GH_TOKEN: @@ github.token @@
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           tag="maestro-preview-${GITHUB_RUN_NUMBER}"
