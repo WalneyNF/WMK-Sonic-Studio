@@ -134,12 +134,12 @@ def to_midi(score):
     tempo=round(60000000/max(1,bpm))
     chunks=[mtrk([(0,0,b"\xff\x51\x03"+tempo.to_bytes(3,"big"))])]
     for idx,part in enumerate(score["instrumentos"][:15]):
-        ch=idx if idx<9 else idx+1
+        ch=9 if any(k in part["instrumento"].lower() for k in ("percuss", "bateria", "drum")) else idx if idx<9 else idx+1
         name=part["instrumento"].encode("utf-8")[:100]
         ev=[(0,0,b"\xff\x03"+vlq(len(name))+name),(0,1,bytes([0xc0|ch,0]))]
         for n in part["notas"]:
             start=n["inicio"]; end=start+max(1,n["duracao"])
-            ev.extend([(start,2,bytes([0x90|ch,n["midi"],90])),
+            ev.extend([(start,2,bytes([0x90|ch,n["midi"],max(1,min(127,int(n.get("velocidade",90))))])),
                        (end,1,bytes([0x80|ch,n["midi"],0]))])
         chunks.append(mtrk(ev))
     return b"MThd"+struct.pack(">IHHH",6,1,len(chunks),PPQ)+b"".join(chunks)
