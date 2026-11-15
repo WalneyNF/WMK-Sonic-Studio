@@ -770,7 +770,7 @@ MainComponent::MainComponent (AudioEngine& e, bool restoreUserSettings)
         if (auto* e = vst3MenuEngine())
             if (const auto t = e->targetOfPlugin (plugin, param))
             {
-                menu.addSectionHeader ("LYNX SHARE - " + describeAutomationTarget (*e, *t));
+                menu.addSectionHeader ("WMK Sonic Studio - " + describeAutomationTarget (*e, *t));
                 addAutomationItem (menu, *e, *t, true);
             }
     };
@@ -896,7 +896,7 @@ MainComponent::MainComponent (AudioEngine& e, bool restoreUserSettings)
         safe->projectName = hostName.isNotEmpty() ? tr ("Live session with {0}", { hostName }) : tr ("Live session");
         safe->updateTitle();
     };
-    // round 169j: the host's LYNX SHARE restarted during a session: its journal's song becomes the open project again
+    // round 169j: the host's WMK Sonic Studio restarted during a session: its journal's song becomes the open project again
     live->onResumed = [safe = juce::Component::SafePointer<MainComponent> (this)] (Song song) {
         if (safe == nullptr)
             return;
@@ -909,7 +909,7 @@ MainComponent::MainComponent (AudioEngine& e, bool restoreUserSettings)
         }
         safe->updateTitle();
     };
-    // round 190ah: a guest's LYNX SHARE restarted during a session: the project it had is open again
+    // round 190ah: a guest's WMK Sonic Studio restarted during a session: the project it had is open again
     live->onRejoined = [safe = juce::Component::SafePointer<MainComponent> (this)] (Song song) {
         if (safe == nullptr)
             return;
@@ -922,7 +922,7 @@ MainComponent::MainComponent (AudioEngine& e, bool restoreUserSettings)
     engine.onSessionUndoSkipped = [] (const juce::StringArray& skipped) {
         ui::postHint ({ tr ("Undo left alone what someone else changed since: {0}", { skipped.joinIntoString (", ") }), {} }, 4000);
     };
-    // round 190gh (B8): a MIDI device plugged in or out while LYNX SHARE runs (FL: "New MIDI device detected")
+    // round 190gh (B8): a MIDI device plugged in or out while WMK Sonic Studio runs (FL: "New MIDI device detected")
     engine.onMidiDevicesChanged = [] (const juce::StringArray& added, const juce::StringArray& removed) {
         juce::StringArray lines;
         if (! added.isEmpty())
@@ -2502,7 +2502,7 @@ void MainComponent::connectBrowser (BrowserComponent& b)
             return false;
         if (! mixer.loadPresetOnSelection (file))
             juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::WarningIcon, tr ("Open mixer track state"),
-                                                    tr ("This file is not a mixer track state LYNX SHARE can read."));
+                                                    tr ("This file is not a mixer track state WMK Sonic Studio can read."));
         return true;
     };
     // the Browser's "Current project" items (REA_rodada115)
@@ -6350,10 +6350,10 @@ void MainComponent::timerCallback()
             if (lynx::rt::shouldShowHint (PluginHost::settingsFolder().getChildFile ("realtime-hint-shown")))
                 juce::AlertWindow::showMessageBoxAsync (
                     juce::MessageBoxIconType::InfoIcon, tr ("Real-time priority"),
-                    tr ("The sound broke up, and Linux runs LYNX SHARE's audio thread at normal priority. Real-time priority makes dropouts much rarer:\n\n"
+                    tr ("The sound broke up, and Linux runs WMK Sonic Studio's audio thread at normal priority. Real-time priority makes dropouts much rarer:\n\n"
                         "- install rtkit (package \"rtkit\"; most desktops already have it), or\n"
                         "- add yourself to the \"audio\" group with an rtprio limit in /etc/security/limits.d (as for JACK),\n\n"
-                        "then log out and in again. LYNX SHARE never needs root. Options > Audio settings shows the current state."));
+                        "then log out and in again. WMK Sonic Studio never needs root. Options > Audio settings shows the current state."));
         }
     }
 
@@ -6395,7 +6395,7 @@ void MainComponent::updateTitle()
         // round 190ap: opened without third-party plugins, while some are still off
         const auto pluginsOff = engine.pluginsOff() ? " " + tr ("(third-party plugins off)") : juce::String();
         window->setName ((engine.isModified() ? "* " : "")
-                         + (projectName.isNotEmpty() ? "LYNX SHARE - " + projectName : juce::String ("LYNX SHARE")) + importedSuffix + pluginsOff + liveState);
+                         + (projectName.isNotEmpty() ? "WMK Sonic Studio - " + projectName : juce::String ("WMK Sonic Studio")) + importedSuffix + pluginsOff + liveState);
     }
 }
 
@@ -7098,7 +7098,7 @@ void MainComponent::checkInterruptedTakes()
         names.add (juce::File (juce::String::fromUTF8 (j.wav.c_str())).getFileName());
     const auto folder = juce::File (juce::String::fromUTF8 (takes.front().wav.c_str())).getParentDirectory();
     auto* w = new juce::AlertWindow (tr ("Recordings recovered"),
-                                     tr ("LYNX SHARE was recording when it stopped. These takes were saved and repaired:\n{0}\n\nPut them on the Playlist "
+                                     tr ("WMK Sonic Studio was recording when it stopped. These takes were saved and repaired:\n{0}\n\nPut them on the Playlist "
                                          "where they were recorded?", { names.joinIntoString ("\n") }),
                                      juce::MessageBoxIconType::InfoIcon);
     w->addButton (tr ("Put them on the Playlist"), 1, juce::KeyPress (juce::KeyPress::returnKey));
@@ -7138,7 +7138,7 @@ void MainComponent::checkPreviousSession (juce::Time sessionStart)
         return; // nothing was saved in that session
     const auto backup = folder.getChildFile (juce::String::fromUTF8 (name.c_str()) + ProjectFile::extension);
 
-    auto* w = new juce::AlertWindow (tr ("LYNX SHARE did not close properly"),
+    auto* w = new juce::AlertWindow (tr ("WMK Sonic Studio did not close properly"),
                                      tr ("The last session ended unexpectedly. Open the newest backup it saved?\n{0}  ({1})",
                                          { backup.getFileName(), backup.getLastModificationTime().formatted ("%Y-%m-%d %H:%M") }),
                                      juce::MessageBoxIconType::WarningIcon);
@@ -7169,7 +7169,7 @@ void MainComponent::newProject (bool askAlways)
             auto song = makeDefaultTemplateProject (&missing);
             startNewProject (std::move (song), {});
             if (missing)
-                ui::postHint ({ tr ("The default template was not found; LYNX SHARE's default project opened instead") }, 6000);
+                ui::postHint ({ tr ("The default template was not found; WMK Sonic Studio's default project opened instead") }, 6000);
             return;
         }
         showNewProjectDialog ([safe = juce::Component::SafePointer<MainComponent> (this)] (Song song, juce::File file) {
@@ -7207,7 +7207,7 @@ void MainComponent::openStartupProject()
     auto song = makeDefaultTemplateProject (&missing);
     if (missing)
     {
-        ui::postHint ({ tr ("The default template was not found; LYNX SHARE's default project opened instead") }, 6000);
+        ui::postHint ({ tr ("The default template was not found; WMK Sonic Studio's default project opened instead") }, 6000);
         return;
     }
     startNewProject (std::move (song), {});
@@ -7250,7 +7250,7 @@ void MainComponent::announceEditorCrash (const juce::String& plugin)
                        .withIconType (juce::MessageBoxIconType::WarningIcon)
                        .withTitle (tr ("Plugin crashed"))
                        .withMessage (tr ("{0} crashed. Save your project now (as a new file is safest).", { plugin }) + "\n\n"
-                                     + tr ("Its window was closed so that LYNX SHARE could keep running. The plugin may not work "
+                                     + tr ("Its window was closed so that WMK Sonic Studio could keep running. The plugin may not work "
                                            "properly until the project is opened again."))
                        .withButton (tr ("Save as..."));
     if (offerSeparate)
@@ -7287,7 +7287,7 @@ void MainComponent::announceSeparateProcessCrash (const juce::String& plugin, bo
                        .withIconType (juce::MessageBoxIconType::WarningIcon)
                        .withTitle (tr ("Plugin crashed"))
                        .withMessage ((crashed ? where : tr ("{0} stopped responding (separate process).", { name })) + "\n\n"
-                                     + tr ("Only its process was affected: LYNX SHARE and your project kept running, and the plugin "
+                                     + tr ("Only its process was affected: WMK Sonic Studio and your project kept running, and the plugin "
                                            "was muted. Save your project.")
                                      + " " + tr ("Reload starts it again with the settings from the last save or backup."))
                        .withButton (tr ("Reload")) // (round 190ao: without reopening the project; only on request)
@@ -7528,14 +7528,14 @@ void MainComponent::openLynxProject (const juce::File& file, bool withoutPlugins
     updateTitle();
     playlist.showSongAfterOpen();
 
-    // pain point 37 (round 177d): a project from a newer LYNX SHARE opens, but saving it here would drop what that
+    // pain point 37 (round 177d): a project from a newer WMK Sonic Studio opens, but saving it here would drop what that
     // version added, so say so once (FL warns about a project from a more recent version too)
     if (safety::savedByNewerVersion (savedBy.toStdString(), JUCE_APPLICATION_VERSION_STRING))
     {
         platform::testModeLog ("project saved by newer version " + savedBy);
         if (! platform::testMode())
             juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::InfoIcon, tr ("Saved by a newer version"),
-                                                    tr ("This project was saved by LYNX SHARE {0}, and this is {1}. What the newer version added may be "
+                                                    tr ("This project was saved by WMK Sonic Studio {0}, and this is {1}. What the newer version added may be "
                                                         "lost if you save it here: use File › Save as... to keep the original.",
                                                         { savedBy, JUCE_APPLICATION_VERSION_STRING }));
     }
@@ -7822,7 +7822,7 @@ void MainComponent::showMissingFiles (bool afterOpening)
                     auto it = std::find_if (info.plugins.begin(), info.plugins.end(), [&] (const MissingPlugin& p) { return p.name == name; });
                     if (it == info.plugins.end())
                         it = info.plugins.insert (info.plugins.end(),
-                                                  MissingPlugin { name, {}, TR_NOOP ("LYNX SHARE substitute: {0} (the original plugin is used again once it is installed). FL Studio plays a missing plugin's slot unprocessed: a substitute slot's menu › Bypass all LYNX SHARE substitutes of this project does the same"),
+                                                  MissingPlugin { name, {}, TR_NOOP ("WMK Sonic Studio substitute: {0} (the original plugin is used again once it is installed). FL Studio plays a missing plugin's slot unprocessed: a substitute slot's menu › Bypass all WMK Sonic Studio substitutes of this project does the same"),
                                                                   effectInfo (fx.kind).name });
                     const auto user = song.mixer[t].name.empty() ? (t == 0 ? std::string ("Master") : "Insert " + std::to_string (t)) : song.mixer[t].name;
                     if (std::find (it->usedBy.begin(), it->usedBy.end(), user) == it->usedBy.end())
@@ -8069,7 +8069,7 @@ void MainComponent::exportMidiFile()
 {
     // FL's File › Export › "MIDI file...": the arrangement's notes (or the current pattern's) as a Standard MIDI File
     const auto folder = currentFile.existsAsFile() ? currentFile.getParentDirectory() : juce::File::getSpecialLocation (juce::File::userMusicDirectory);
-    const auto name = projectName.isNotEmpty() ? projectName : juce::String ("LYNX SHARE");
+    const auto name = projectName.isNotEmpty() ? projectName : juce::String ("WMK Sonic Studio");
     fileChooser = lynx::ui::makeFileChooser (tr ("Export MIDI file"), folder.getChildFile (name + ".mid"), "*.mid");
     juce::Component::SafePointer<MainComponent> safe (this);
     lynx::ui::launchChooser (fileChooser, juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::warnAboutOverwriting,
@@ -8141,7 +8141,7 @@ void MainComponent::save (bool askForFile, std::function<void()> afterSaved)
                                   }
                                   // FL warns the same way: the backup folder is cleaned up as new backups arrive
                                   auto* w = new juce::AlertWindow (tr ("Save in the backup folder?"),
-                                                                   tr ("This folder keeps LYNX SHARE's automatic backups and old ones are deleted as new "
+                                                                   tr ("This folder keeps WMK Sonic Studio's automatic backups and old ones are deleted as new "
                                                                        "ones arrive, so a project saved here can be lost. If you opened a backup, save it "
                                                                        "somewhere else."),
                                                                    juce::MessageBoxIconType::WarningIcon);
@@ -8796,11 +8796,11 @@ juce::PopupMenu MainComponent::getMenuForIndex (int barIndex, const juce::String
                           [] { updater::goBack(); });
         }
         // round 190fq (LYNX's own): an optional way to donate, next to About in every layout; it never unlocks anything
-        menu.addItem (tr ("Support LYNX SHARE..."), [] { support::showSupportWindow(); });
-        menu.addItem (tr ("About LYNX SHARE"), [] {
+        menu.addItem (tr ("Support WMK Sonic Studio..."), [] { support::showSupportWindow(); });
+        menu.addItem (tr ("About WMK Sonic Studio"), [] {
             auto* window = makeAboutWindow().release();
             window->enterModalState (true, juce::ModalCallbackFunction::create ([] (int result) {
-                                         if (result == 2) // "Support LYNX SHARE"
+                                         if (result == 2) // "Support WMK Sonic Studio"
                                              support::showSupportWindow();
                                      }),
                                      true);
@@ -8849,7 +8849,7 @@ std::unique_ptr<juce::AlertWindow> MainComponent::makeAboutWindow()
     struct About final : juce::AlertWindow
     {
         About()
-            : juce::AlertWindow ("LYNX SHARE " JUCE_APPLICATION_VERSION_STRING,
+            : juce::AlertWindow ("WMK Sonic Studio " JUCE_APPLICATION_VERSION_STRING,
                                  tr ("Lightweight C++/JUCE DAW: FL Studio-style patterns and Ableton Live-style clips.\n"
                                      "Independent implementation: no Image-Line or Ableton code was copied.")
                                      + "\n\n" + tr ("Logo by {0}", { "w3teal" }) // the community member who made it
@@ -8858,8 +8858,8 @@ std::unique_ptr<juce::AlertWindow> MainComponent::makeAboutWindow()
                                  juce::MessageBoxIconType::NoIcon)
         {
             addCustomComponent (&logo);
-            // round 190fq: one short line under the logo, and a button to the Support window (Help › Support LYNX SHARE...)
-            supportLine.setText (tr ("LYNX SHARE is free and open source. Donations are optional and help it keep going."), juce::dontSendNotification);
+            // round 190fq: one short line under the logo, and a button to the Support window (Help › Support WMK Sonic Studio...)
+            supportLine.setText (tr ("WMK Sonic Studio is free and open source. Donations are optional and help it keep going."), juce::dontSendNotification);
             supportLine.setJustificationType (juce::Justification::centred);
             supportLine.setFont (theme::font (theme::type::body));
             supportLine.setColour (juce::Label::textColourId, theme::colour::textSecondary);
@@ -8871,7 +8871,7 @@ std::unique_ptr<juce::AlertWindow> MainComponent::makeAboutWindow()
         juce::Label supportLine;
     };
     auto window = std::make_unique<About>();
-    window->addButton (tr ("Support LYNX SHARE"), 2);
+    window->addButton (tr ("Support WMK Sonic Studio"), 2);
     if (auto* supportButton = window->getButton (0))
         supportButton->setComponentID ("about.support");
     window->addButton (tr ("OK"), 1, juce::KeyPress (juce::KeyPress::returnKey));
@@ -8896,7 +8896,7 @@ void MainComponent::showLanguageChoice (const juce::String& id)
     const juce::LocalisedStrings strings (table, false);
     auto say = [&] (const char* text) { return table.isEmpty() ? juce::String::fromUTF8 (text) : strings.translate (juce::String::fromUTF8 (text)); };
 
-    auto* window = new juce::AlertWindow (say (TR_NOOP ("Language")), say (TR_NOOP ("The new language is applied when LYNX SHARE restarts.")),
+    auto* window = new juce::AlertWindow (say (TR_NOOP ("Language")), say (TR_NOOP ("The new language is applied when WMK Sonic Studio restarts.")),
                                           juce::MessageBoxIconType::InfoIcon);
     window->addButton (say (TR_NOOP ("Restart now")), 1, juce::KeyPress (juce::KeyPress::returnKey));
     window->addButton (say (TR_NOOP ("Later")), 0, juce::KeyPress (juce::KeyPress::escapeKey));
@@ -9083,7 +9083,7 @@ void MainComponent::showHelp()
 {
     juce::DialogWindow::LaunchOptions options;
     options.content.setOwned (makeHelpContent (&keyMap).release());
-    options.dialogTitle = tr ("LYNX SHARE shortcuts");
+    options.dialogTitle = tr ("WMK Sonic Studio shortcuts");
     options.dialogBackgroundColour = theme::colour::bg2;
     options.useNativeTitleBar = true;
     options.resizable = true;
@@ -9179,7 +9179,7 @@ void MainComponent::showImportReport()
     if (const auto& matched = engine.getMatchedPlugins(); ! matched.isEmpty())
         text << tr ("Plugins found on this PC:") << "\n  " << matched.joinIntoString ("\n  ") << "\n\n";
     if (! missing.isEmpty())
-        text << tr ("Plugins not installed on this PC (or in a folder LYNX SHARE doesn't scan; Options > Setup wizard):") << "\n  "
+        text << tr ("Plugins not installed on this PC (or in a folder WMK Sonic Studio doesn't scan; Options > Setup wizard):") << "\n  "
              << missing.joinIntoString ("\n  ") << "\n\n";
     if (const auto& lost = engine.getPluginsWithoutState(); ! lost.isEmpty())
         text << tr ("Plugins found but playing their default settings (the project saved them for the other format, VST2/VST3):") << "\n  "
