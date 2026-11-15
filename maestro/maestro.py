@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """WMK Maestro IA: composição MIDI local, com IA Ollama opcional; sem dependências externas."""
 import json, os, re, random, struct, sys
+from importlib import import_module
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -146,6 +147,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             self.send(200, (HERE/"index.html").read_bytes(), "text/html; charset=utf-8")
+        elif self.path == "/partituras.html":
+            self.send(200, (HERE/"partituras.html").read_bytes(), "text/html; charset=utf-8")
         elif self.path == "/api/health":
             self.send(200, b'{"status":"ok","produto":"WMK Maestro IA"}')
         elif re.fullmatch(r"/arquivos/WMK_[0-9_]+\.mid", self.path):
@@ -155,11 +158,34 @@ class Handler(BaseHTTPRequestHandler):
             else: self.send(404, b'{"erro":"Arquivo nao encontrado"}')
         else: self.send(404, b'{"erro":"Nao encontrado"}')
     def do_POST(self):
-        if self.path != "/api/compose":
+        if self.path not in ("/api/compose", "/api/partituras"):
             return self.send(404, b'{"erro":"Nao encontrado"}')
         try:
             size = int(self.headers.get("Content-Length", "0"))
-            if not 0 < size <= 8192: raise ValueError("Pedido muito grande ou vazio.")
+            max_size = 2 * 1024 * 1024 if self.path == "/api/partituras" else 8192
+            if not 0 < size <= max_size: raise ValueError("Pedido muito grande ou vazio.")
+            if self.path == "/api/partituras":
+                from partituras import parse_musicxml, parse_midi, to_midi
+                import base64
+                data = json.loads(self.rfile.read(size))
+                if not isinstance(data, dict): raise ValueError("Pedido inválido.")
+                filename = str(data.get("nome", ""))[:180]
+                if not filename.lower().endswith((".mid", ".midi", ".musicxml", ".xml", ".mxl")):
+                    raise ValueError("Use arquivos MIDI, MusicXML ou MXL.")
+                binary = base64.b64decode(data.get("conteudo", ""), validate=True)
+                if len(binary) > 1024 * 1024: raise ValueError("Arquivo acima do limite de 1 MB.")
+                score = parse_midi(binary) if filename.lower().endswith((".mid", ".midi")) else parse_musicxml(binary, filename)
+                if score["formato"] == "MusicXML":
+                    OUTPUT.mkdir(parents=True, exist_ok=True)
+                    outname = "WMK_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f") + ".mid"
+                    (OUTPUT/outname).write_bytes(to_midi(score))
+                    score["arquivo"] = outname
+                # Limita visualização a 120 primeiras notas por instrumento;
+                # não altera o MIDI completo exportado.
+                for p in score["instrumentos"]:
+                    p["notas"] = p["notas"][:120]
+                self.send(200, json.dumps(score, ensure_ascii=False).encode())
+                return
             data = json.loads(self.rfile.read(size))
             if not isinstance(data, dict): raise ValueError("Pedido invalido.")
             if data.get("usar_ollama"):
