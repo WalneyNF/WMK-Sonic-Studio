@@ -1,0 +1,67 @@
+name: WMK Maestro IA - EXE Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'maestro/**'
+      - 'manuais.html'
+      - '.github/workflows/maestro-windows.yml'
+permissions:
+  contents: write
+concurrency:
+  group: wmk-maestro-windows-@@ github.ref @@
+  cancel-in-progress: true
+jobs:
+  build:
+    name: Testar e empacotar Maestro IA
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: maestro/requirements-build.txt
+      - name: Instalar empacotador
+        run: python -m pip install -r maestro/requirements-build.txt
+      - name: Verificar sintaxe e testes
+        shell: pwsh
+        run: |
+          python -m compileall -q maestro
+          python -m unittest discover -s maestro -p "test_*.py" -v
+      - name: Gerar executável do Maestro
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir --console --name "WMK-Maestro-IA" --paths maestro --add-data "maestro/*.html;maestro" --hidden-import maestro --hidden-import pipeline --hidden-import agente --hidden-import compositor_ia --hidden-import provedores --hidden-import partituras --hidden-import integracoes maestro/launcher.py
+          if ($LASTEXITCODE -ne 0) { throw "PyInstaller falhou." }
+          if (-not (Test-Path "dist/WMK-Maestro-IA/WMK-Maestro-IA.exe")) { throw "EXE não encontrado." }
+      - name: Autoteste do EXE
+        shell: pwsh
+        run: |
+          & "dist/WMK-Maestro-IA/WMK-Maestro-IA.exe" --selftest
+          if ($LASTEXITCODE -ne 0) { throw "Autoteste do EXE falhou." }
+      - name: Montar pacote para download
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "downloads" -Force | Out-Null
+          Copy-Item README.md "dist/WMK-Maestro-IA/LEIA-ME.txt"
+          if (Test-Path manuais.html) { Copy-Item manuais.html "dist/WMK-Maestro-IA/" }
+          Copy-Item LICENSE, THIRD_PARTY.md "dist/WMK-Maestro-IA/"
+          Compress-Archive -Path "dist/WMK-Maestro-IA" -DestinationPath "downloads/WMK-Maestro-IA-Windows-x64.zip"
+          Get-ChildItem downloads -File | ForEach-Object { "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } | Set-Content "downloads/SHA256SUMS.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WMK-Maestro-IA-Windows-x64
+          path: downloads/*
+          if-no-files-found: error
+      - name: Publicar versão experimental no Releases
+        shell: bash
+        env:
+          GH_TOKEN: @@ github.token @@
+        run: |
+          set -euo pipefail
+          tag="maestro-preview-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" downloads/* --prerelease --target "$GITHUB_SHA" \
+            --title "WMK Maestro IA - Preview Windows ${GITHUB_RUN_NUMBER}" \
+            --notes "Executável experimental do módulo WMK Maestro IA com agentes, compositor MIDI e interfaces locais. Não é a DAW C++ completa. Código e licença: repositório de origem."
