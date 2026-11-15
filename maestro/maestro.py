@@ -154,6 +154,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             self.send(200, (HERE/"index.html").read_bytes(), "text/html; charset=utf-8")
+        elif self.path == "/agente.html":
+            self.send(200, (HERE/"agente.html").read_bytes(), "text/html; charset=utf-8")
         elif self.path == "/integracoes.html":
             self.send(200, (HERE/"integracoes.html").read_bytes(), "text/html; charset=utf-8")
         elif self.path == "/provedores.html":
