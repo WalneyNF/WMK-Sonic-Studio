@@ -300,10 +300,10 @@ void drawSplashFrame (juce::Graphics& g, const SplashFrame& frame)
         g.setOpacity (1.0f);
     }
 
-    // "LYNX SHARE" (v0.1.20 rename): "LYNX" big, "SHARE" under it in the accent colour, spaced out to the same
+    // WMK Sonic Studio: WMK big, SONIC STUDIO below in violet, spaced to the same
     // width; the letters slide in one after another
     {
-        const juce::String word ("LYNX"), word2 ("SHARE");
+        const juce::String word ("WMK"), word2 ("SONIC STUDIO");
         const auto& big = fonts[0];
         const auto& small = fonts[1];
         const auto left = 300.0f;
