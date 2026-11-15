@@ -48,3 +48,13 @@ O código derivado é distribuído sob a [GNU AGPL-3.0](LICENSE). Você pode usa
 - [Roadmap de evolução](roadmap.html).
 
 **Formatos iniciais:** MusicXML/MXL e MIDI. PDFs, imagens e arquivos MSCZ diretos ainda não são suportados.
+
+## WMK Music Bridge — MuseScore e Suno
+
+- [Painel de integração](maestro/integracoes.html) — após iniciar o serviço Python em `127.0.0.1:8768`.
+- [Conversor de arquivos pelo MuseScore instalado](maestro/integracoes.py).
+- [Roadmap completo](roadmap.html).
+
+O conversor é executado **no seu computador** e usa a instalação local do MuseScore Studio. O painel monta prompts para o Suno, mas **não utiliza API não oficial nem baixa músicas automaticamente**. Use áudio somente quando houver licença e download permitidos, especialmente em jogos comerciais.
+
+No Windows: `py -3 maestro/maestro.py`, depois `http://127.0.0.1:8768/integracoes.html`.
