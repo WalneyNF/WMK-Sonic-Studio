@@ -7,7 +7,7 @@
 // LYNX design tokens: the single source of colours, type sizes, spacing and radii for the whole UI,
 // plus the LookAndFeel that draws every stock JUCE widget with them.
 //
-// Identity: dark, flat, high contrast, with one red accent used sparingly (selection, active
+// Identity WMK: dark, platinum-silver typography and purple accent used sparingly (selection, active
 // states, playhead/record, primary actions). Surfaces get lighter as they rise ("elevation").
 namespace lynx::theme
 {
@@ -32,7 +32,7 @@ inline juce::Colour textPrimary { 0xffeceef2 };
 inline juce::Colour textSecondary { 0xffa1a6b0 };
 inline juce::Colour textDisabled { 0xff60656f };
 
-// the red accent
+// WMK violet / silver accent
 inline juce::Colour accent { 0xffe5383b };
 inline juce::Colour accentHover { 0xfff2545a };
 inline juce::Colour accentPressed { 0xffc12a30 };
