@@ -66,7 +66,7 @@ LangString StillRunning ${LANG_PORTUGUESEBR} "O WMK Sonic Studio está aberto. F
 Function .onInit
     ; the installer's language follows Windows
     System::Call 'kernel32::GetUserDefaultUILanguage() i .r0'
-    ${If} WriteRegStr HKCU "Software\WMK Sonic Studio" == 1046
+    ${If} $0 == 1046
         StrCpy $LANGUAGE ${LANG_PORTUGUESEBR}
     ${EndIf}
     Call SilentKeepsChoices
@@ -119,7 +119,7 @@ Section "!$(SecApp)" SecMain
     WriteRegStr HKCU "Software\Classes\Applications\WMK-Sonic-Studio.exe\shell\open\command" "" '"$INSTDIR\WMK-Sonic-Studio.exe" "%1"'
     WriteRegStr HKCU "Software\Classes\Applications\WMK-Sonic-Studio.exe\SupportedTypes" ".lynx" ""
 
-    $0 "$INSTDIR"
+    WriteRegStr HKCU "Software\WMK Sonic Studio" "InstallDir" "$INSTDIR"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "WMK Sonic Studio"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayVersion" "${VERSION}"
     WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "WMK"
