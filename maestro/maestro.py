@@ -144,9 +144,21 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
+    def _allowed_origin(self):
+        from urllib.parse import urlsplit
+        origin=self.headers.get("Origin","")
+        if not origin: return True
+        parsed=urlsplit(origin)
+        host=self.headers.get("Host","")
+        return parsed.scheme=="http" and parsed.netloc==host and parsed.hostname in ("127.0.0.1","localhost")
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             self.send(200, (HERE/"index.html").read_bytes(), "text/html; charset=utf-8")
+        elif self.path == "/provedores.html":
+            self.send(200, (HERE/"provedores.html").read_bytes(), "text/html; charset=utf-8")
+        elif self.path == "/api/provedores":
+            from provedores import list_providers
+            self.send(200, json.dumps(list_providers(),ensure_ascii=False).encode())
         elif self.path == "/partituras.html":
             self.send(200, (HERE/"partituras.html").read_bytes(), "text/html; charset=utf-8")
         elif self.path == "/api/health":
@@ -158,12 +170,32 @@ class Handler(BaseHTTPRequestHandler):
             else: self.send(404, b'{"erro":"Arquivo nao encontrado"}')
         else: self.send(404, b'{"erro":"Nao encontrado"}')
     def do_POST(self):
-        if self.path not in ("/api/compose", "/api/partituras"):
+        if self.path not in ("/api/compose", "/api/partituras", "/api/provedores/salvar", "/api/provedores/excluir", "/api/provedores/testar", "/api/ensinar"):
             return self.send(404, b'{"erro":"Nao encontrado"}')
+        if not self._allowed_origin():
+            return self.send(403, b'{"erro":"Origem nao autorizada"}')
         try:
             size = int(self.headers.get("Content-Length", "0"))
             max_size = 2 * 1024 * 1024 if self.path == "/api/partituras" else 8192
             if not 0 < size <= max_size: raise ValueError("Pedido muito grande ou vazio.")
+            if self.path.startswith("/api/provedores/") or self.path == "/api/ensinar":
+                if size > 8192: raise ValueError("Pedido muito grande.")
+                data = json.loads(self.rfile.read(size))
+                if not isinstance(data,dict): raise ValueError("Pedido inválido.")
+                if self.path == "/api/provedores/salvar":
+                    from provedores import save_provider
+                    result=save_provider(data)
+                elif self.path == "/api/provedores/excluir":
+                    from provedores import remove_provider
+                    result=remove_provider(str(data.get("id","")))
+                elif self.path == "/api/provedores/testar":
+                    from provedores import test_provider
+                    result=test_provider(str(data.get("id","")))
+                else:
+                    from compositor_ia import teach
+                    result=teach(data.get("pergunta",""),data.get("provedor") or None,data.get("contexto",""))
+                self.send(200, json.dumps(result,ensure_ascii=False).encode())
+                return
             if self.path == "/api/partituras":
                 from partituras import parse_musicxml, parse_midi, to_midi
                 import base64
@@ -188,9 +220,13 @@ class Handler(BaseHTTPRequestHandler):
                 return
             data = json.loads(self.rfile.read(size))
             if not isinstance(data, dict): raise ValueError("Pedido invalido.")
-            if data.get("usar_ollama"):
-                data["prompt"] = ollama_suggest(str(data.get("prompt","")), data.get("modelo","qwen2.5:7b"))
-            result = compose(data)
+            if data.get("modo") == "ia":
+                from compositor_ia import compose_with_provider
+                result = compose_with_provider(data.get("prompt",""),data.get("provedor") or None)
+            else:
+                if data.get("usar_ollama"):
+                    data["prompt"] = ollama_suggest(str(data.get("prompt","")), data.get("modelo","qwen2.5:7b"))
+                result = compose(data)
             self.send(200, json.dumps(result, ensure_ascii=False).encode())
         except (ValueError, KeyError, json.JSONDecodeError) as e:
             self.send(400, json.dumps({"erro":str(e)},ensure_ascii=False).encode())
