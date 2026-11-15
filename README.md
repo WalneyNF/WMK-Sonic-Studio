@@ -41,3 +41,10 @@ O workflow existente `.github/workflows/release.yml` prevê compilação e gera�
 
 ## Licença e créditos
 O código derivado é distribuído sob a [GNU AGPL-3.0](LICENSE). Você pode usar, estudar, modificar, distribuir e comercializar respeitando suas condições, incluindo a disponibilização do código-fonte correspondente quando exigida. O autor original, demais colaboradores e suas atribuições devem permanecer reconhecidos. Serviços online e endereços do projeto original ainda exigem auditoria antes de uma publicação WMK.
+## Leitor de Partituras + Professor Musical (experimental)
+
+- [Interface do leitor de partituras](maestro/partituras.html) — acessível com o servidor local ativo.
+- [Manual do leitor e formatos](maestro/LEITOR_PARTITURAS.md).
+- [Roadmap de evolução](roadmap.html).
+
+**Formatos iniciais:** MusicXML/MXL e MIDI. PDFs, imagens e arquivos MSCZ diretos ainda não são suportados.
