@@ -104,7 +104,7 @@ def run_pipeline(brief,mode="ia",provider_id=None):
                     p=_provider(agent,provider_id)
                     context="\n".join(x["resultado"] for x in stages if x["status"]=="concluido")[-MAX_CONTEXT:]
                     # O prompt do compositor é EDITÁVEL e faz parte do pedido musical.
-                    music=compose_with_provider(agent["prompt"]+"\nBriefing:\n"+brief+"\nContexto:\n"+context,p["id"])
+                    music=compose_with_provider((agent["prompt"][:700]+"\nBriefing:\n"+brief[:700]+"\nContexto:\n"+context[:500])[:1950],p["id"])
                 else:
                     music=maestro.compose({"prompt":brief,"bars":16})
                 entry["resultado"]="MIDI criado: "+music["arquivo"]+"; "+str(music["notas"])+" notas em "+str(len(music["instrumentos"]))+" pistas."
