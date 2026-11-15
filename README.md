@@ -26,6 +26,12 @@ No aplicativo, selecione **Português (Brasil)** nas configurações de idioma.
 
 O workflow existente `.github/workflows/release.yml` prevê compilação e geração de pacotes. Enquanto a migração de nomes técnicos não for concluída, o alvo CMake e o executável interno continuam como `LYNX` e `LYNX.exe` para preservar os scripts de build. Uma compilação ainda precisa ser validada no fork.
 
+## WMK Maestro IA (novo protótipo)
+
+- [Abrir compositor IA local e instruções](maestro/README.md)
+- [Interface do compositor](maestro/index.html) — executar via servidor Python local
+- [Código do gerador MIDI](maestro/maestro.py)
+
 ## Manuais WMK
 - [Manual de iniciação musical e trilhas para jogos](manual.html)
 - [Roadmap de evolução](roadmap.html)
