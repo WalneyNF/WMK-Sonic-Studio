@@ -21,3 +21,9 @@ A qualidade musical é **experimental**; ritmos, articulações e harmonia reque
 ```powershell
 py -3 -m unittest discover -s maestro -p "test_*.py"
 ```
+
+## Ler partituras e estudar notas
+
+Abra [Leitor de Partituras](partituras.html) com o servidor iniciado (URL: http://127.0.0.1:8768/partituras.html).
+
+Documentação: [LEITOR_PARTITURAS.md](LEITOR_PARTITURAS.md). Formatos iniciais: .musicxml, .xml, .mxl, .mid, .midi.
