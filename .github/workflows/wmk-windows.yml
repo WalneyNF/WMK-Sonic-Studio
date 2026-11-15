@@ -12,7 +12,7 @@ permissions:
   contents: write
 concurrency:
   group: wmk-windows-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 env:
   ZIG_VERSION: '0.14.1'
   ZIG_SHA256: 24aeeec8af16c381934a6cd7d95c807a8cb2cf7df9fa40d359aa884195c4716c
@@ -35,6 +35,19 @@ jobs:
           curl -fsSL --retry 3 -o juce.tar.gz "https://github.com/juce-framework/JUCE/archive/refs/tags/$JUCE_VERSION.tar.gz"
           echo "$JUCE_SHA256  juce.tar.gz" | sha256sum -c -
           tar xzf juce.tar.gz && mv "JUCE-$JUCE_VERSION" "juce-$JUCE_VERSION"
+      - name: Gerar icone Windows da marca WMK
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv-brand
+          .venv-brand/bin/pip install --quiet pillow cairosvg
+          .venv-brand/bin/python - <<'PY'
+          from PIL import Image
+          import cairosvg
+          cairosvg.svg2png(url="resources/brand/WMK-Sonic-Studio.svg", write_to="resources/brand/WMK-Sonic-Studio.png", output_width=512, output_height=512)
+          picture = Image.open("resources/brand/WMK-Sonic-Studio.png").convert("RGBA")
+          picture.save("resources/LYNX.ico", format="ICO", sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
+          PY
       - name: Compilar motor e aplicativo
         shell: bash
         run: |
@@ -42,11 +55,13 @@ jobs:
           ZIG="$HOME/opt/zig-x86_64-linux-$ZIG_VERSION/zig" JUCE_DIR="$HOME/opt/juce-$JUCE_VERSION" OUT=build-win ./scripts/build-windows-zig.sh
           test -s build-win/LYNX.exe
           ./scripts/fetch-onnxruntime.sh windows build-win
+          cp resources/LYNX.ico build-win/WMK.ico
       - uses: actions/upload-artifact@v4
         with:
           name: binario-wmk-windows
           path: |
             build-win/LYNX.exe
+            build-win/WMK.ico
             build-win/LYNX-bridge32.exe
             build-win/onnxruntime.dll
             build-win/lynx-asio.dll
@@ -65,7 +80,8 @@ jobs:
       - name: Verificar aplicativo em execução
         shell: pwsh
         run: |
-          $p = Start-Process 'bin\LYNX.exe' -ArgumentList '--selftest', "$PWD\selftest.txt", "$PWD\demo.lynx" -Wait -PassThru
+          Copy-Item 'bin\LYNX.exe' 'bin\WMK-Sonic-Studio.exe'
+          $p = Start-Process 'bin\WMK-Sonic-Studio.exe' -ArgumentList '--selftest', "$PWD\selftest.txt", "$PWD\demo.lynx" -Wait -PassThru
           if ($p.ExitCode -ne 0 -or -not (Test-Path selftest.txt) -or -not (Select-String -Path selftest.txt -Pattern '^result=OK' -Quiet)) { throw 'Falhou selftest do aplicativo' }
       - name: Gerar ZIP portátil e instalador NSIS
         shell: pwsh
@@ -73,7 +89,9 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $name = "WMK-Sonic-Studio-Windows-x64"
           New-Item -ItemType Directory -Force "pkg\$name",dist | Out-Null
-          Copy-Item bin\LYNX.exe,LICENSE,THIRD_PARTY.md,PRIVACY.md "pkg\$name\"
+          Copy-Item bin\LYNX.exe "pkg\$name\WMK-Sonic-Studio.exe"
+          Copy-Item LICENSE,THIRD_PARTY.md,PRIVACY.md "pkg\$name\"
+          Copy-Item bin\WMK.ico "pkg\$name\"
           foreach ($file in @('onnxruntime.dll','LYNX-bridge32.exe','lynx-asio.dll','lynx-asio32.dll')) { if (Test-Path "bin\$file") { Copy-Item "bin\$file" "pkg\$name\" } }
           foreach ($doc in @('manual.html','manuais.html','roadmap.html','pesquisa.html')) { if (Test-Path $doc) { Copy-Item $doc "pkg\$name\" } }
           if (Test-Path 'README.md') { Copy-Item README.md "pkg\$name\" }
@@ -82,7 +100,7 @@ jobs:
           $nsis = (Get-Command makensis -ErrorAction SilentlyContinue).Source
           if (-not $nsis) { $nsis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe" }
           if (-not (Test-Path $nsis)) { choco install nsis -y --no-progress; $nsis = "${env:ProgramFiles(x86)}\NSIS\makensis.exe" }
-          & $nsis -V2 -INPUTCHARSET UTF8 "-DVERSION=0.1.28" "-DSTAGE=$PWD\pkg\$name" "-DOUTFILE=$PWD\dist\WMK-Sonic-Studio-Setup-Windows-x64.exe" "-DICON=$PWD\resources\LYNX.ico" resources\installer\LYNX.nsi
+          & $nsis -V2 -INPUTCHARSET UTF8 "-DVERSION=0.1.28" "-DSTAGE=$PWD\pkg\$name" "-DOUTFILE=$PWD\dist\WMK-Sonic-Studio-Setup-Windows-x64.exe" "-DICON=$PWD\bin\WMK.ico" resources\installer\LYNX.nsi
           if ($LASTEXITCODE -ne 0) { throw 'Falha ao gerar instalador NSIS' }
           Get-ChildItem dist
       - name: Gerar SHA256
@@ -101,4 +119,4 @@ jobs:
         run: |
           set -euo pipefail
           tag="wmk-preview-${GITHUB_RUN_NUMBER}"
-          gh release create "$tag" dist/* --prerelease --target "$GITHUB_SHA" --title "WMK Sonic Studio - Windows (alfa ${GITHUB_RUN_NUMBER})" --notes "Versão experimental criada automaticamente pelo GitHub Actions. Binário técnico interno: LYNX.exe. Teste em ambiente seguro antes de usar em produção. Código-fonte e avisos de terceiros: https://github.com/$GITHUB_REPOSITORY"
+          gh release create "$tag" dist/* --prerelease --target "$GITHUB_SHA" --title "WMK Sonic Studio - Windows (alfa ${GITHUB_RUN_NUMBER})" --notes "Versão experimental criada automaticamente pelo GitHub Actions. EXE com nome WMK-Sonic-Studio.exe; dependências técnicas internas mantêm nomes históricos. Teste em ambiente seguro antes de usar em produção. Código-fonte e avisos de terceiros: https://github.com/$GITHUB_REPOSITORY"
