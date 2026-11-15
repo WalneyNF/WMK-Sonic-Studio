@@ -1,5 +1,9 @@
 # WMK Sonic Studio 🎧
 
+![Logo WMK Sonic Studio](resources/brand/WMK-Sonic-Studio.svg)
+
+**Identidade visual:** roxo, prata e azul elétrico.
+
 **Estúdio de produção musical para criar trilhas, efeitos e músicas para jogos.**
 
 Fork do [LYNX SHARE](https://github.com/Ka1-S/LYNX-SHARE), desenvolvido em C++20/JUCE 8, sob licença **AGPL-3.0**. Projeto em fase **alfa**.
@@ -24,7 +28,7 @@ No aplicativo, selecione **Português (Brasil)** nas configurações de idioma.
 ## Windows: GitHub Actions
 [Actions](https://github.com/WalneyNF/WMK-Sonic-Studio/actions) • [Releases](https://github.com/WalneyNF/WMK-Sonic-Studio/releases)
 
-O workflow existente `.github/workflows/release.yml` prevê compilação e geração de pacotes. Enquanto a migração de nomes técnicos não for concluída, o alvo CMake e o executável interno continuam como `LYNX` e `LYNX.exe` para preservar os scripts de build. Uma compilação ainda precisa ser validada no fork.
+O build Windows customizado gera o executável de distribuição `WMK-Sonic-Studio.exe` e o instalador WMK; alguns alvos e nomes internos continuam `LYNX` para compatibilidade com o código original. Consulte o resultado efetivo no GitHub Actions antes de anunciar uma versão estável.
 
 ## WMK Maestro IA (novo protótipo)
 
